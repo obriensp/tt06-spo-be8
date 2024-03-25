@@ -2,11 +2,15 @@
 `timescale 1ns/1ps
 
 module debugger_apb(
+`ifdef USE_POWER_PINS
+  input wire         VPWR,
+  input wire         VGND,
+`endif
   input wire         PCLK,
   input wire         PRESETn,
 
   input wire         PSEL,
-  input wire   [7:0] PADDR,
+  input wire   [4:0] PADDR,
   input wire         PENABLE,
   input wire         PWRITE,
   input wire   [7:0] PWDATA,
@@ -16,25 +20,26 @@ module debugger_apb(
   input wire   [7:0] INREG
 );
 
-  wire [1:0] selected_device;
-  address_decoder decode(
-    .PADDR(PADDR),
-    .SEL(selected_device)
-  );
+  // wire [1:0] selected_device;
+  // address_decoder decode(
+  //   .PADDR(PADDR),
+  //   .SEL(selected_device)
+  // );
+  wire selected_device = PADDR != 5'b0;
 
-  wire [7:0] id_rdata;
-  wire id_ready;
-  hardware_id id(
-    .PCLK(PCLK),
-    .PRESETn(PRESETn),
-    .PSEL(selected_device == 2'b10),
-    .PADDR(PADDR),
-    .PENABLE(PENABLE),
-    .PWRITE(PWRITE),
-    .PWDATA(PWDATA),
-    .PRDATA(id_rdata),
-    .PREADY(id_ready)
-  );
+  // wire [7:0] id_rdata;
+  // wire id_ready;
+  // hardware_id id(
+  //   .PCLK(PCLK),
+  //   .PRESETn(PRESETn),
+  //   .PSEL(selected_device == 2'b10),
+  //   .PADDR(PADDR),
+  //   .PENABLE(PENABLE),
+  //   .PWRITE(PWRITE),
+  //   .PWDATA(PWDATA),
+  //   .PRDATA(id_rdata),
+  //   .PREADY(id_ready)
+  // );
 
   wire reset_request;
   wire [7:0] status_rdata;
@@ -101,13 +106,13 @@ module debugger_apb(
     .PREADY0(status_ready),
 
     .PRDATA1(cpu_rdata),
-    .PREADY1(cpu_ready),
+    .PREADY1(cpu_ready)
 
-    .PRDATA2(id_rdata),
-    .PREADY2(id_ready),
-
-    .PRDATA3(8'b0),
-    .PREADY3(1'b1)
+//     .PRDATA2(id_rdata),
+//     .PREADY2(id_ready),
+//
+//     .PRDATA3(8'b0),
+//     .PREADY3(1'b1)
   );
 
   wire       DEBUG_REQUEST;
@@ -120,6 +125,10 @@ module debugger_apb(
   wire [7:0] OUTREG;
   wire       HALTED;
   core core(
+`ifdef USE_POWER_PINS
+    .VPWR(VPWR),
+    .VGND(VGND),
+`endif
     .CLK(PCLK),
     .RESETn(PRESETn & ~reset_request),
     .DEBUG_REQUEST(DEBUG_REQUEST),
@@ -155,7 +164,7 @@ endmodule
 
 
 module address_decoder(
-  input wire [7:0] PADDR,
+  input wire [4:0] PADDR,
   output reg [1:0] SEL
 );
 
@@ -163,7 +172,7 @@ module address_decoder(
     begin
       if (PADDR == 8'b0)
         SEL <= 2'b00;
-      else if (PADDR[7:3] == 5'b11111)
+      else if (PADDR[4:3] == 5'b11)
         SEL <= 2'b10;
       else
         SEL <= 2'b01;
@@ -173,7 +182,7 @@ endmodule
 
 
 module apb_mux(
-  input wire  [1:0] SEL,
+  input wire        SEL,
 
   output reg  [7:0] PRDATA,
   output reg        PREADY,
@@ -182,37 +191,37 @@ module apb_mux(
   input wire        PREADY0,
 
   input wire  [7:0] PRDATA1,
-  input wire        PREADY1,
+  input wire        PREADY1
 
-  input wire  [7:0] PRDATA2,
-  input wire        PREADY2,
-
-  input wire  [7:0] PRDATA3,
-  input wire        PREADY3
+//   input wire  [7:0] PRDATA2,
+//   input wire        PREADY2,
+//
+//   input wire  [7:0] PRDATA3,
+//   input wire        PREADY3
 );
 
   always @(*)
     begin
-      if (SEL == 2'b00)
+      if (SEL == 1'b0)
         begin
           PRDATA <= PRDATA0;
           PREADY <= PREADY0;
         end
-      else if (SEL == 2'b01)
+      else //if (SEL == 2'b01)
         begin
           PRDATA <= PRDATA1;
           PREADY <= PREADY1;
         end
-      else if (SEL == 2'b10)
-        begin
-          PRDATA <= PRDATA2;
-          PREADY <= PREADY2;
-        end
-      else if (SEL == 2'b11)
-        begin
-          PRDATA <= PRDATA3;
-          PREADY <= PREADY3;
-        end
+      // else if (SEL == 2'b10)
+      //   begin
+      //     PRDATA <= PRDATA2;
+      //     PREADY <= PREADY2;
+      //   end
+      // else // if (SEL == 2'b11)
+      //   begin
+      //     PRDATA <= PRDATA3;
+      //     PREADY <= PREADY3;
+      //   end
     end
 
 endmodule
@@ -223,7 +232,7 @@ module hardware_id(
   input wire         PRESETn,
 
   input wire         PSEL,
-  input wire   [7:0] PADDR,
+  input wire   [4:0] PADDR,
   input wire         PENABLE,
   input wire         PWRITE,
   input wire   [7:0] PWDATA,

@@ -2,6 +2,10 @@
 `timescale 1ns/1ns
 
 module datapath(
+`ifdef USE_POWER_PINS
+  input wire VPWR,
+  input wire VGND,
+`endif
   input wire CLK,
   input wire RESETn,
 
@@ -57,13 +61,23 @@ module datapath(
   );
 
   // Memory address
-  wire [3:0] xADDR_HIGH; // ignoring the top 4 bits of the address register
   wire [3:0] ADDR;
-  register address_register(CLK, RESETn, CLR, {4'b0, BUS[3:0]}, {xADDR_HIGH, ADDR}, MIn);
+  register4 address_register(CLK, RESETn, CLR, BUS[3:0], ADDR, MIn);
 
   // RAM
   wire [7:0] RAM_OUT;
-  ram ram(CLK, RESETn, ADDR, BUS, RAM_OUT, RI);
+  ram ram(
+`ifdef USE_POWER_PINS
+    .VPWR(VPWR),
+    .VGND(VGND),
+`endif
+    .CLK(CLK),
+    .RESETn(RESETn),
+    .ADDR(ADDR),
+    .DIN(BUS),
+    .DOUT(RAM_OUT),
+    .RI(RI)
+  );
 
   // Bus mux
   bus_mux bmux(

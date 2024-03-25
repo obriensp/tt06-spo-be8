@@ -42,7 +42,7 @@ module tt_um_example (
   wire sda_t;
 
   wire psel;
-  wire [7:0] paddr;
+  wire [4:0] paddr;
   wire penable;
   wire pwrite;
   wire [7:0] pwdata;

@@ -31,6 +31,7 @@ project:
     - "pc.v"
     - "ram.v"
     - "register.v"
+    - "register4.v"
     - "status_reg.v"
     - "streams1_to_apb.v"
     - "streams4_to_apb.v"
