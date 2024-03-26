@@ -51,6 +51,9 @@ if __name__ == '__main__':
   # Insert our custom step after the PDN generation
 	ProjectFlow.Steps.insert(ProjectFlow.Steps.index(OpenROAD.GeneratePDN) + 1, CustomPower)
 
+	# Temporarily disable antenna repair to avoid a segfault in openroad on linux machine
+	ProjectFlow.Steps.remove(OpenROAD.RepairAntennas)
+
 	args = parser.parse_args()
 	config = vars(args)
 
