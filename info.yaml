@@ -33,8 +33,6 @@ project:
     - "register.v"
     - "register4.v"
     - "status_reg.v"
-    - "streams1_to_apb.v"
-    - "streams4_to_apb.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
