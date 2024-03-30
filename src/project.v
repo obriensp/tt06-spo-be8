@@ -55,7 +55,7 @@ module tt_um_spo_i2ctest(
     .PREADY(PREADY)
   );
 
-  debugger_apb debugger(
+  apb_ram u_ram(
   `ifdef USE_POWER_PINS
     .VPWR(VPWR),
     .VGND(VGND),
@@ -68,14 +68,18 @@ module tt_um_spo_i2ctest(
     .PWRITE(PWRITE),
     .PWDATA(PWDATA),
     .PRDATA(PRDATA),
-    .PREADY(PREADY),
-    .INREG(8'b0)
+    .PREADY(PREADY)
   );
 
 endmodule
 
 
-module reflector(
+module apb_ram(
+`ifdef USE_POWER_PINS
+  input wire        VPWR,
+  input wire        VGND,
+`endif
+
   input wire         PCLK,
   input wire         PRESETn,
 
@@ -88,8 +92,21 @@ module reflector(
   output wire        PREADY
 );
 
-  // assign PRDATA = {3'b0, PADDR};
-  assign PRDATA = 8'b0;
+  ram u_ram(
+  `ifdef USE_POWER_PINS
+    .VPWR(VPWR),
+    .VGND(VGND),
+  `endif
+
+    .CLK(PCLK),
+    .RESETn(PRESETn),
+
+    .ADDR(PADDR[3:0]),
+    .DIN(PWDATA),
+    .DOUT(PRDATA),
+    .RI(PSEL & PENABLE & PWRITE)
+  );
+
   assign PREADY = 1'b1;
 
 endmodule
