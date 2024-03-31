@@ -7,7 +7,7 @@ TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = project.v
 
-PROJECT_SOURCES += alu.v bus_mux.v control.v core.v cpu_access.v datapath.v debugger_apb.v debugger_microcode.v full_adder.v i2c_slave.v i2c_to_apb.v microcode.v pc.v ram.v register.v register4.v status_reg.v RAM8.v I2C.v
+PROJECT_SOURCES += alu.v bus_mux.v control.v core.v cpu_access.v datapath.v debugger_apb.v debugger_microcode.v full_adder.v i2c_slave.v i2c_to_apb.v microcode.v pc.v ram.v register.v register4.v status_reg.v RAM16.v I2C.v
 
 ifneq ($(GATES),yes)
 
@@ -30,7 +30,7 @@ VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_f
 
 # this gets copied in by the GDS action workflow
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
-VERILOG_SOURCES += $(PWD)/../macros/RAM8/RAM8.pnl.v
+VERILOG_SOURCES += $(PWD)/../macros/RAM16/RAM16.pnl.v
 VERILOG_SOURCES += $(PWD)/../macros/I2C/I2C.pnl.v
 
 endif
